@@ -13,8 +13,7 @@ base_dict = {'SAMPLE_RATE': SAMPLE_RATE,
              'AUDIO_LEN': AUDIO_LEN,
              'TARGET_SNR_LIST_TRAIN': TARGET_SNR_LIST_TRAIN,
              'TARGET_SNR_LIST_TEST': TARGET_SNR_LIST_TEST,
-             'BATCH_SIZE': 40,
-             'N_EPOCHS': 20
+             'BATCH_SIZE': 40
              }
 
 
