@@ -1,0 +1,11 @@
+.idea/
+data/
+models/
+images/
+.dvc/
+speech_env/
+.env
+.ipynb_checkpoints/
+src/__pycache__/
+src/SQL_queries_snowflake.py
+notebooks/

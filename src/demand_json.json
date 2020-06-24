@@ -1,0 +1,475 @@
+{
+  "files": [
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DEMAND.pdf"
+      }, 
+      "checksum": "md5:a513afe131e08cdacf7c1854b174d5ab", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DEMAND.pdf", 
+      "type": "pdf", 
+      "size": 87837
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DKITCHEN_16k.zip"
+      }, 
+      "checksum": "md5:7ffbf52d7f4699f96927846103dc8788", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DKITCHEN_16k.zip", 
+      "type": "zip", 
+      "size": 110501049
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DKITCHEN_48k.zip"
+      }, 
+      "checksum": "md5:b4d38241fbd50d8a17f8742ca6870c10", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DKITCHEN_48k.zip", 
+      "type": "zip", 
+      "size": 336992458
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DLIVING_16k.zip"
+      }, 
+      "checksum": "md5:46741384d9e434a0bd8b3ec1830b6052", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DLIVING_16k.zip", 
+      "type": "zip", 
+      "size": 80170627
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DLIVING_48k.zip"
+      }, 
+      "checksum": "md5:6ea02bb944e7e5950274f9e7d5faab4b", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DLIVING_48k.zip", 
+      "type": "zip", 
+      "size": 253978613
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DWASHING_16k.zip"
+      }, 
+      "checksum": "md5:7e5ee9437ce9409c5f9a779b6212a240", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DWASHING_16k.zip", 
+      "type": "zip", 
+      "size": 102343250
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/DWASHING_48k.zip"
+      }, 
+      "checksum": "md5:ecf765f12b8d3ada7ef0ec664b8f8d73", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "DWASHING_48k.zip", 
+      "type": "zip", 
+      "size": 306101499
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NFIELD_16k.zip"
+      }, 
+      "checksum": "md5:a740046c6f4e174e16f5d568aaec5024", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NFIELD_16k.zip", 
+      "type": "zip", 
+      "size": 86536782
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NFIELD_48k.zip"
+      }, 
+      "checksum": "md5:937eab7d3f64cea99fa377238e84c185", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NFIELD_48k.zip", 
+      "type": "zip", 
+      "size": 270538724
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NPARK_16k.zip"
+      }, 
+      "checksum": "md5:80f1385a34d7f1705758926b57f138ce", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NPARK_16k.zip", 
+      "type": "zip", 
+      "size": 86029332
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NPARK_48k.zip"
+      }, 
+      "checksum": "md5:bb90ec754ac02eede51bf80675a78cfe", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NPARK_48k.zip", 
+      "type": "zip", 
+      "size": 257645848
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NRIVER_16k.zip"
+      }, 
+      "checksum": "md5:54264db61d3fe073fb81f2e40e0d19b5", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NRIVER_16k.zip", 
+      "type": "zip", 
+      "size": 98689565
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/NRIVER_48k.zip"
+      }, 
+      "checksum": "md5:112c7997f19ef8f1f952fb3e066f6e1f", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "NRIVER_48k.zip", 
+      "type": "zip", 
+      "size": 284560347
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OHALLWAY_16k.zip"
+      }, 
+      "checksum": "md5:fe918bbb0e63e73d09ba7f4843ef33f1", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OHALLWAY_16k.zip", 
+      "type": "zip", 
+      "size": 77941854
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OHALLWAY_48k.zip"
+      }, 
+      "checksum": "md5:cb9227a75d2c1342de0b6548da4bbb1b", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OHALLWAY_48k.zip", 
+      "type": "zip", 
+      "size": 252905617
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OMEETING_16k.zip"
+      }, 
+      "checksum": "md5:62f7cfe7fe6d30b7d8a215fe37c2dfd2", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OMEETING_16k.zip", 
+      "type": "zip", 
+      "size": 82703355
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OMEETING_48k.zip"
+      }, 
+      "checksum": "md5:eae4c54c0e441df8375a979c0e9828f6", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OMEETING_48k.zip", 
+      "type": "zip", 
+      "size": 253340198
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OOFFICE_16k.zip"
+      }, 
+      "checksum": "md5:7b61cc2d182d5a654cb9c3101ddd4041", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OOFFICE_16k.zip", 
+      "type": "zip", 
+      "size": 88995191
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/OOFFICE_48k.zip"
+      }, 
+      "checksum": "md5:6f87edf8a6b03f17b3f693af1754aab4", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "OOFFICE_48k.zip", 
+      "type": "zip", 
+      "size": 277643831
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PCAFETER_16k.zip"
+      }, 
+      "checksum": "md5:99927d148128254141a9417d051510bb", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PCAFETER_16k.zip", 
+      "type": "zip", 
+      "size": 107431494
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PCAFETER_48k.zip"
+      }, 
+      "checksum": "md5:b7b8b10f41b747cd0fd3849db13cebd2", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PCAFETER_48k.zip", 
+      "type": "zip", 
+      "size": 314117272
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PRESTO_16k.zip"
+      }, 
+      "checksum": "md5:b98d2e6854eeebb397f29a8ad7457092", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PRESTO_16k.zip", 
+      "type": "zip", 
+      "size": 111292815
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PRESTO_48k.zip"
+      }, 
+      "checksum": "md5:6e9fef96d78e636029fd4c5929b9cece", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PRESTO_48k.zip", 
+      "type": "zip", 
+      "size": 327432202
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PSTATION_16k.zip"
+      }, 
+      "checksum": "md5:d7448009f6c2aeb6ba570375df1750a3", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PSTATION_16k.zip", 
+      "type": "zip", 
+      "size": 119441094
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/PSTATION_48k.zip"
+      }, 
+      "checksum": "md5:b40f603504997111b0bf7e2ce78e0594", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "PSTATION_48k.zip", 
+      "type": "zip", 
+      "size": 348948834
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/SCAFE_48k.zip"
+      }, 
+      "checksum": "md5:1a4ee387f1900f4b15ba219481c76556", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "SCAFE_48k.zip", 
+      "type": "zip", 
+      "size": 325884186
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/scripts.zip"
+      }, 
+      "checksum": "md5:8e4cfde3e264e1a0cc1bcc24fa3f16f9", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "scripts.zip", 
+      "type": "zip", 
+      "size": 4783
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/SPSQUARE_16k.zip"
+      }, 
+      "checksum": "md5:205d0e7b8fe74504a2f8d252fc414b9e", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "SPSQUARE_16k.zip", 
+      "type": "zip", 
+      "size": 110928528
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/SPSQUARE_48k.zip"
+      }, 
+      "checksum": "md5:f5fbdd5c1e03ab8c44c32ad96261ca26", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "SPSQUARE_48k.zip", 
+      "type": "zip", 
+      "size": 320482248
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/STRAFFIC_16k.zip"
+      }, 
+      "checksum": "md5:2efa87262f272bbf9ba578088e81939c", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "STRAFFIC_16k.zip", 
+      "type": "zip", 
+      "size": 118572691
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/STRAFFIC_48k.zip"
+      }, 
+      "checksum": "md5:ffbcdebb7e1c39d3d5b7920b0594e20b", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "STRAFFIC_48k.zip", 
+      "type": "zip", 
+      "size": 348263839
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TBUS_16k.zip"
+      }, 
+      "checksum": "md5:706b11b0d8504f9f3b3f3211e91b3863", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TBUS_16k.zip", 
+      "type": "zip", 
+      "size": 128916709
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TBUS_48k.zip"
+      }, 
+      "checksum": "md5:f7d6657314d90c6f270955eaed411ddc", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TBUS_48k.zip", 
+      "type": "zip", 
+      "size": 376202003
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TCAR_16k.zip"
+      }, 
+      "checksum": "md5:4d930012796bd298932245a26189f973", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TCAR_16k.zip", 
+      "type": "zip", 
+      "size": 130045975
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TCAR_48k.zip"
+      }, 
+      "checksum": "md5:8550f03e8356d8054ae845e8b4b6c773", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TCAR_48k.zip", 
+      "type": "zip", 
+      "size": 373520251
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TMETRO_16k.zip"
+      }, 
+      "checksum": "md5:95daf4df678e13b120e14211e6d89571", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TMETRO_16k.zip", 
+      "type": "zip", 
+      "size": 126589090
+    }, 
+    {
+      "links": {
+        "self": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09/TMETRO_48k.zip"
+      }, 
+      "checksum": "md5:00d895020233f94348aafce7140d671f", 
+      "bucket": "e782d6a4-0e88-415a-a9d1-198860b53b09", 
+      "key": "TMETRO_48k.zip", 
+      "type": "zip", 
+      "size": 367513573
+    }
+  ], 
+  "owners": [
+    44869
+  ], 
+  "doi": "10.5281/zenodo.1227121", 
+  "stats": {
+    "version_unique_downloads": 9313.0, 
+    "unique_views": 24807.0, 
+    "views": 27051.0, 
+    "version_views": 27023.0, 
+    "unique_downloads": 9302.0, 
+    "version_unique_views": 24782.0, 
+    "volume": 7739323320093.0, 
+    "version_downloads": 50156.0, 
+    "downloads": 50103.0, 
+    "version_volume": 7744470756021.0
+  }, 
+  "links": {
+    "doi": "https://doi.org/10.5281/zenodo.1227121", 
+    "conceptdoi": "https://doi.org/10.5281/zenodo.1227120", 
+    "bucket": "https://zenodo.org/api/files/e782d6a4-0e88-415a-a9d1-198860b53b09", 
+    "conceptbadge": "https://zenodo.org/badge/doi/10.5281/zenodo.1227120.svg", 
+    "html": "https://zenodo.org/record/1227121", 
+    "latest_html": "https://zenodo.org/record/1227121", 
+    "badge": "https://zenodo.org/badge/doi/10.5281/zenodo.1227121.svg", 
+    "latest": "https://zenodo.org/api/records/1227121"
+  }, 
+  "conceptdoi": "10.5281/zenodo.1227120", 
+  "created": "2018-04-24T10:46:21.267306+00:00", 
+  "updated": "2020-01-24T19:26:18.394509+00:00", 
+  "conceptrecid": "1227120", 
+  "revision": 6, 
+  "id": 1227121, 
+  "metadata": {
+    "access_right_category": "success", 
+    "doi": "10.5281/zenodo.1227121", 
+    "description": "<p><strong>DEMAND: Diverse Environments Multichannel Acoustic Noise Database</strong></p>\n\n<p>A database of 16-channel environmental noise recordings</p>\n\n<p><strong>Introduction</strong></p>\n\n<p>Microphone arrays, a (typically regular) arrangement of several microphones, allow for a number of interesting signal processing techniques. The correlation of audio signals from microphones that are located in close proximity with each other can, for example, be used to determine the spatial location of sound source relative to the array, or to isolate or enhance a signal based on the direction from which the sound reaches the array.</p>\n\n<p>Typically, experiments with microphone arrays that consider acoustic background noise use controlled environments or simulated environments. Such artificial setups will in general be sparse in terms of noise sources. Other pre-existing real-world noise databases (e.g. the <a href=\"http://catalog.elra.info/product_info.php?products_id=693\">AURORA-2</a> corpus, the <a href=\"http://spandh.dcs.shef.ac.uk/projects/chime/PCC/datasets.html\">CHiME</a> background noise data, or the <a href=\"http://www.speech.cs.cmu.edu/comp.speech/Section1/Data/noisex.html\">NOISEX-92</a> database) tend to provide only a very limited variety of environments and are limited to at most 2 channels.</p>\n\n<p>The DEMAND (Diverse Environments Multichannel Acoustic Noise Database) presented here provides a set of recordings that allow testing of algorithms using real-world noise in a variety of settings. This version provides 15 recordings. All recordings are made with a 16-channel array, with the smallest distance between microphones being 5 cm and the largest being 21.8 cm.</p>\n\n<p><strong>License</strong></p>\n\n<p>This work, the audio data and the document describing it, is licensed under a <a href=\"http://creativecommons.org/licenses/by-sa/3.0/deed.en_CA\">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</p>\n\n<p><strong>The data</strong></p>\n\n<p>A description of the data and the recording equipment is provided in the file <strong>DEMAND.pdf</strong>. All recordings are available as 16 single-channel WAV files in one directory at both 48 kHz and 16 kHz sampling rates. All files are compressed into &quot;zip&quot; files.</p>\n\n<p><strong>Other information</strong></p>\n\n<p>The MATLAB scripts listed in the documentation can be found in the file <strong>scripts.zip</strong>.</p>\n\n<p><strong>The Authors</strong></p>\n\n<p>This work was created by Joachim Thiemann (IRISA-CNRS), Nobutaka Ito (University of Tokyo), and Emmanuel Vincent (Inria Rennes - Bretagne Atlantique). It was supported by Inria under the Associate Team Program <a href=\"http://versamus.inria.fr\">VERSAMUS</a>.</p>", 
+    "language": "eng", 
+    "title": "DEMAND: a collection of multi-channel recordings of acoustic noise in diverse environments", 
+    "license": {
+      "id": "CC-BY-4.0"
+    }, 
+    "notes": "Supported by Inria under the Associate Team Program VERSAMUS", 
+    "relations": {
+      "version": [
+        {
+          "count": 1, 
+          "index": 0, 
+          "parent": {
+            "pid_type": "recid", 
+            "pid_value": "1227120"
+          }, 
+          "is_last": true, 
+          "last_child": {
+            "pid_type": "recid", 
+            "pid_value": "1227121"
+          }
+        }
+      ]
+    }, 
+    "version": "1.0", 
+    "keywords": [
+      "Noise", 
+      "Multichannel Audio", 
+      "Microphone Array"
+    ], 
+    "publication_date": "2013-06-09", 
+    "creators": [
+      {
+        "orcid": "0000-0002-8617-8330", 
+        "affiliation": "IRISA-CNRS", 
+        "name": "Thiemann, Joachim"
+      }, 
+      {
+        "affiliation": "University of Tokyo", 
+        "name": "Ito, Nobutaka"
+      }, 
+      {
+        "affiliation": "INRIA", 
+        "name": "Vincent, Emmanuel"
+      }
+    ], 
+    "meeting": {
+      "acronym": "ICA 2013", 
+      "url": "https://acousticalsociety.org/montreal-canada/", 
+      "dates": "2-7 June 2013", 
+      "place": "Montreal, Canada", 
+      "title": "21st International Congress on Acoustics"
+    }, 
+    "access_right": "open", 
+    "resource_type": {
+      "type": "dataset", 
+      "title": "Dataset"
+    }, 
+    "related_identifiers": [
+      {
+        "scheme": "doi", 
+        "identifier": "10.5281/zenodo.1227120", 
+        "relation": "isVersionOf"
+      }
+    ]
+  }
+}
