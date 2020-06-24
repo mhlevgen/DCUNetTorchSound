@@ -1,5 +1,6 @@
 import os
 import logging
+import argparse
 import numpy as np
 import torch
 from torchvision import transforms
@@ -13,7 +14,6 @@ from src.models_config import base_dict
 from src.unet import UNet
 from src.modules import STFT, ComplexMaskOnPolarCoo, ISTFT, WeightedSDR, pesq_metric
 
-
 AUDIO_LEN = base_dict['AUDIO_LEN']
 SAMPLE_RATE = base_dict['SAMPLE_RATE']
 LOAD_SAMPLE_RATE = base_dict['LOAD_SAMPLE_RATE']
@@ -23,10 +23,14 @@ PRINT_N_BATCH = 10
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, model_features,
+                 encoder_depth,
+                 padding_mode="zeros"):
         super(Net, self).__init__()
         self.stft = STFT()
-        self.unet = UNet()
+        self.unet = UNet(model_features=model_features,
+                         encoder_depth=encoder_depth,
+                         padding_mode=padding_mode)
         self.masking = ComplexMaskOnPolarCoo()
         self.istft = ISTFT()
 
@@ -87,11 +91,10 @@ def get_datasets():
 
     print(f'Len train: {len(vctk_noise_train)}')
     print(f'Len test: {len(vctk_noise_test)}')
-    return demand_train, demand_test, vctk_noise_train, vctk_noise_test
+    return vctk_noise_train, vctk_noise_test
 
 
 def get_dataloades(train_data, test_data):
-
     data_loader_train = torch.utils.data.DataLoader(train_data,
                                                     batch_size=BATCH_SIZE,
                                                     shuffle=True,
@@ -106,16 +109,42 @@ def get_dataloades(train_data, test_data):
     return data_loader_train, data_loader_test
 
 
-if __name__ == "__main__":
-    logging.info(f"Start training")
-    print(torch.cuda.is_available(), torch.backends.cudnn.enabled, torch.__version__)
-    os.makedirs(os.path.join(BASE_DIR, 'models'), exist_ok=True)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+def write_metrics_to_file(file_name, metric_list, mode):
+    with open(os.path.join(BASE_DIR, 'models', file_name), mode=mode) as f:
+        f.write('\n'.join(['{:.3f}'.format(i) for i in metric_list]))
+        f.write('\n')
 
-    demand_train, demand_test, vctk_noise_train, vctk_noise_test = get_datasets()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-device', '--device',
+                        help='cuda number', default=0)
+    parser.add_argument('-m_f', '--model_features',
+                        type=int, default=32, help='number of model features to get unet architecture')
+    parser.add_argument('-e_d', '--encoder_depth',
+                        type=int, default=5, help='number of encoder layers to get unet architecture')
+    parser.add_argument('-epochs', '--num_epochs',
+                        type=int, default=5, help='number of epochs to train model')
+    parser.add_argument('-save_best', '--save_best',
+                        type=bool, default=True,
+                        help='save best model after epoch, if false save model after every epoch')
+    args = parser.parse_args()
+
+    available_model_configs = ((32, 5), (32, 8), (45, 10), (32, 10))
+    assert (args.model_features, args.encoder_depth) in available_model_configs, "Check model config. Passing config " \
+                                                                                 "is not available "
+
+    logging.info(f"Start training")
+
+    os.makedirs(os.path.join(BASE_DIR, 'models'), exist_ok=True)
+    device = torch.device(f"cuda:{args.device}" if torch.cuda.is_available() else "cpu")
+    logging.info(f"Cuda device available: {device}")
+
+    vctk_noise_train, vctk_noise_test = get_datasets()
     data_loader_train, data_loader_test = get_dataloades(train_data=vctk_noise_train,
                                                          test_data=vctk_noise_test)
-    model = Net()
+    model = Net(model_features=args.model_features,
+                encoder_depth=args.encoder_depth)
     model.to(device)
     loss_sdr = WeightedSDR()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -124,17 +153,18 @@ if __name__ == "__main__":
                                                      patience=5,
                                                      verbose=True)
     start_pesq_test = 0
-    for epoch in range(N_EPOCHS):
+    for epoch in range(args.num_epochs):
 
         loss_train, loss_test = [], []
         pesq_train, pesq_test = [], []
         model.train()
-        for i, data in enumerate(data_loader_train, 0):
+        for i, data in enumerate(data_loader_train):
             logging.info(f"Epoch {epoch + 1} - {i}")
-            (waveform_sound_noise, waveform, waveform_noise, sample_rate, utterance,
+            (waveform_sound_noise, waveform, waveform_noise, _, _,
              speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data
 
-            logging.info(f"Data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i,j,z,k,f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
+            logging.info(
+                f"Data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i, j, z, k, f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
 
             waveform_sound_noise = waveform_sound_noise.to(device)
             waveform = waveform.to(device)
@@ -154,7 +184,6 @@ if __name__ == "__main__":
 
             pesq = pesq_metric(y_hat=estimated_sound, y_true=waveform)
             logging.info(f"Epoch {epoch + 1} - {i} pesq calculated")
-            pesq_train.append(pesq)
 
             loss.backward()
             optimizer.step()
@@ -162,23 +191,21 @@ if __name__ == "__main__":
             logging.info(f"Epoch {epoch + 1} - {i} backward done")
 
             loss_train.append(loss.item())
+            pesq_train.append(pesq)
 
             if i % PRINT_N_BATCH == PRINT_N_BATCH - 1:
                 print('train [%d, %5d] loss: %.3f, pesq: %.3f' %
                       (epoch + 1, i + 1, np.mean(loss_train), np.nanmean(pesq_train)))
-                mode = 'w' if i == PRINT_N_BATCH - 1 else 'a'
-                with open(os.path.join(BASE_DIR, 'models', 'train_loss.txt'), mode=mode) as f:
-                    f.write('\n'.join(['{:.3f}'.format(i) for i in loss_train]))
-                    f.write('\n')
-                with open(os.path.join(BASE_DIR, 'models', 'train_pesq.txt'), mode=mode) as f:
-                    f.write('\n'.join(['{:.3f}'.format(i) for i in pesq_train]))
-                    f.write('\n')
-                loss_train, pesq_train = [], []
+
+        mode = 'w' if epoch == 0 else 'a'
+        write_metrics_to_file('train_loss.txt', loss_train, mode=mode)
+        write_metrics_to_file('train_pesq.txt', pesq_train, mode=mode)
+        loss_train, pesq_train = [], []
 
         with torch.no_grad():
             model.eval()
-            for i, data in enumerate(data_loader_test, 0):
-                (waveform_sound_noise, waveform, waveform_noise, sample_rate, utterance,
+            for i, data in enumerate(data_loader_test):
+                (waveform_sound_noise, waveform, waveform_noise, _, _,
                  speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data
 
                 logging.info(
@@ -208,20 +235,19 @@ if __name__ == "__main__":
 
             mode = 'w' if epoch == 0 else 'a'
 
-            with open(os.path.join(BASE_DIR, 'models', 'test_loss.txt'), mode=mode) as f:
-                f.write('\n'.join(['{:.3f}'.format(i) for i in loss_test]))
-                f.write('\n')
-            with open(os.path.join(BASE_DIR, 'models', 'test_pesq.txt'), mode=mode) as f:
-                f.write('\n'.join(['{:.3f}'.format(i) for i in pesq_test]))
-                f.write('\n')
+            write_metrics_to_file('test_loss.txt', loss_test, mode=mode)
+            write_metrics_to_file('test_pesq.txt', pesq_test, mode=mode)
 
             scheduler.step(np.mean(loss_test))
 
-            if np.mean(pesq_test) > start_pesq_test:
+            if not args.save_best or (args.save_best and np.mean(pesq_test) > start_pesq_test):
                 path = os.path.join(BASE_DIR, 'models',
-                                    'checkpoint_epoch_{}_{:.3f}_{:.3f}.pth'.format(epoch,
-                                                                                   np.mean(loss_test),
-                                                                                   np.nanmean(pesq_test)))
+                                    'chp_model_{}_{}_epoch_{}_{:.2f}_{:.2f}.pth'.format(epoch,
+                                                                                        args.model_features,
+                                                                                        args.encoder_depth,
+                                                                                        np.mean(loss_test),
+                                                                                        np.nanmean(pesq_test)
+                                                                                        ))
                 torch.save({
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
