@@ -46,7 +46,7 @@ def get_datasets():
 
     demand_train = DEMAND(os.path.join(BASE_DIR, 'data'),
                           sample_rate=LOAD_SAMPLE_RATE,
-                          num_noise_to_load=4,
+                          num_noise_to_load=8,
                           download=True,
                           transform=composed,
                           num_synthetic_noise=2
@@ -56,10 +56,12 @@ def get_datasets():
     test_noise = set(demand_train.available_noise) - set(demand_train.noise_to_load)
     test_noise = list(test_noise)
     test_noise.sort()
+    test_noise = test_noise[:5]
+    print(f"Test noise: {' '.join(test_noise)}")
 
     demand_test = DEMAND(os.path.join(BASE_DIR, 'data'),
                          sample_rate=LOAD_SAMPLE_RATE,
-                         noise_to_load=test_noise[:3],
+                         noise_to_load=test_noise,
                          download=True,
                          transform=composed
                          )
@@ -68,7 +70,6 @@ def get_datasets():
     vctk_noise_train = VCTKNoise(root=os.path.join(BASE_DIR, 'data'),
                                  target_snr_list=base_dict['TARGET_SNR_LIST_TRAIN'],
                                  num_speakers=28,
-                                 # speakers_list=['p252'],
                                  noise_dataset=demand_train,
                                  download=True,
                                  transform=composed)
@@ -127,6 +128,7 @@ if __name__ == "__main__":
 
         loss_train, loss_test = [], []
         pesq_train, pesq_test = [], []
+        model.train()
         for i, data in enumerate(data_loader_train, 0):
             logging.info(f"Epoch {epoch + 1} - {i}")
             (waveform_sound_noise, waveform, waveform_noise, sample_rate, utterance,
@@ -147,8 +149,7 @@ if __name__ == "__main__":
                             signal_with_noise=waveform_sound_noise,
                             target_signal=waveform,
                             noise=waveform_noise)
-            if loss.item() < -1:
-                print('hh')
+
             logging.info(f"Epoch {epoch + 1} - {i} loss calculated")
 
             pesq = pesq_metric(y_hat=estimated_sound, y_true=waveform)
@@ -175,6 +176,7 @@ if __name__ == "__main__":
                 loss_train, pesq_train = [], []
 
         with torch.no_grad():
+            model.eval()
             for i, data in enumerate(data_loader_test, 0):
                 (waveform_sound_noise, waveform, waveform_noise, sample_rate, utterance,
                  speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data

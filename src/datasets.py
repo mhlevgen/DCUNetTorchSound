@@ -275,7 +275,8 @@ def get_voice_noise_for_inference(speaker_id=None,
             composed = transforms.Compose([torchaudio.transforms.Resample(orig_freq=sample_rate,
                                                                           new_freq=base_dict['SAMPLE_RATE']),
                                            AudioPadding(required_length=base_dict['AUDIO_LEN'],
-                                                        padding_tail='right')])
+                                                        # padding_tail='right'
+                                                        )])
             return composed(waveform), folder, sound_id
 
     waveform, speaker_id, utterance_id = get_audio(speakers_folder,

@@ -113,7 +113,6 @@ class UNet(nn.Module):
                               out_channels=self.model_config['enc_channels'][i + 1],
                               kernel_size=self.model_config['enc_kernel_sizes'][i],
                               stride=self.model_config['enc_strides'][i],
-                              padding=self.model_config['enc_paddings'][i],
                               padding_mode=padding_mode)
             self.encoder_list.append(encoder)
 
