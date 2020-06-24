@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torchaudio
 from pypesq import pesq
+from src.datasets import get_voice_noise_for_inference
 from src.models_config import base_dict
 
 N_FFT = base_dict['N_FFT']
@@ -85,8 +86,6 @@ def calculate_weighted_sdr(output, signal_with_noise, target_signal, noise):
     y_hat_norm = torch.norm(y_hat, dim=-1)
     z_hat_norm = torch.norm(z_hat, dim=-1)
 
-    # def loss_sdr(a, a_hat, a_norm, a_hat_norm):
-    #     return dotproduct(a, a_hat) / (a_norm * a_hat_norm + 1e-8)
     def loss_sdr(a, a_hat, a_norm, a_hat_norm):
         return (a * a_hat).sum(dim=1) / (a_norm * a_hat_norm + eps)
 
@@ -109,24 +108,57 @@ def pesq_metric(y_hat, y_true):
         return sum_pesq
 
 
-def test_model(model, model_pref, vctk_noise_test, device, path_for_results, ind=5):
-    (waveform_sound_noise, _, _, sample_rate, utterance,
-     speaker_id, utterance_id, noise_origin, noise_id, target_snr) = vctk_noise_test[ind]
+def model_inference(model, model_pref, path_for_results,
+                    speaker_id=None,
+                    utterance_id=None,
+                    noise_origin=None,
+                    noise_id=None,
+                    target_snr=10):
+    os.makedirs(path_for_results, exist_ok=True)
+    (sound_noise_wave, speaker_id,
+     utterance_id, noise_origin,
+     noise_id) = get_voice_noise_for_inference(speaker_id=speaker_id,
+                                               utterance_id=utterance_id,
+                                               noise_origin=noise_origin,
+                                               noise_id=noise_id,
+                                               target_snr=target_snr)
 
     with torch.no_grad():
-        waveform_sound_noise = waveform_sound_noise.to(device)
-        estimated_sound = model(waveform_sound_noise)
+        estimated_sound = model(sound_noise_wave)
 
-    init_wave_file_name = f'init_sound_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-    torchaudio.save(os.path.join(path_for_results,
-                                 init_wave_file_name),
-                    waveform_sound_noise, 16000, precision=32)
+        init_wave_file_name = f'init_sound_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
+        torchaudio.save(os.path.join(path_for_results,
+                                     init_wave_file_name),
+                        sound_noise_wave,
+                        SAMPLE_RATE,
+                        precision=32)
+        print(f'Saved to {init_wave_file_name}')
 
-    procecces_wave_file_name = f'sound_{model_pref}_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-    torchaudio.save(os.path.join(path_for_results,
-                                 procecces_wave_file_name),
-                    estimated_sound, 16000, precision=32)
+        procecces_wave_file_name = f'model_{model_pref}_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
+        torchaudio.save(os.path.join(path_for_results,
+                                     procecces_wave_file_name),
+                        estimated_sound,
+                        SAMPLE_RATE,
+                        precision=32)
+        print(f'Saved to {procecces_wave_file_name}')
 
 
+def load_model_from_checkpoint(model, path_to_checkpoint):
+    checkpoint = torch.load(path_to_checkpoint)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+    return model
 
 
+if __name__ == "__main__":
+    from src.train_unet import Net
+
+    PATH = '../models/checkpoint_epoch_0_-0.947_2.752.pth'
+
+    model = Net()
+    model = load_model_from_checkpoint(model, PATH)
+
+    model_inference(model=model,
+                    model_pref='first',
+                    target_snr=20,
+                    path_for_results='../results/')
