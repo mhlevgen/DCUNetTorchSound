@@ -1,9 +1,7 @@
-import os
 import torch
 import torch.nn as nn
 import torchaudio
 from pypesq import pesq
-from src.datasets import get_voice_noise_for_inference
 from src.models_config import base_dict
 
 N_FFT = base_dict['N_FFT']
@@ -108,57 +106,14 @@ def pesq_metric(y_hat, y_true):
         return sum_pesq
 
 
-def model_inference(model, model_pref, path_for_results,
-                    speaker_id=None,
-                    utterance_id=None,
-                    noise_origin=None,
-                    noise_id=None,
-                    target_snr=10):
-    os.makedirs(path_for_results, exist_ok=True)
-    (sound_noise_wave, speaker_id,
-     utterance_id, noise_origin,
-     noise_id) = get_voice_noise_for_inference(speaker_id=speaker_id,
-                                               utterance_id=utterance_id,
-                                               noise_origin=noise_origin,
-                                               noise_id=noise_id,
-                                               target_snr=target_snr)
-
-    with torch.no_grad():
-        estimated_sound = model(sound_noise_wave)
-
-        init_wave_file_name = f'init_sound_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-        torchaudio.save(os.path.join(path_for_results,
-                                     init_wave_file_name),
-                        sound_noise_wave,
-                        SAMPLE_RATE,
-                        precision=32)
-        print(f'Saved to {init_wave_file_name}')
-
-        procecces_wave_file_name = f'model_{model_pref}_{speaker_id}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-        torchaudio.save(os.path.join(path_for_results,
-                                     procecces_wave_file_name),
-                        estimated_sound,
-                        SAMPLE_RATE,
-                        precision=32)
-        print(f'Saved to {procecces_wave_file_name}')
-
-
-def load_model_from_checkpoint(model, path_to_checkpoint):
+def load_model_from_checkpoint(model, path_to_checkpoint, optimizer=None, training=False):
     checkpoint = torch.load(path_to_checkpoint)
     model.load_state_dict(checkpoint['model_state_dict'])
+    if training:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch = checkpoint['epoch']
+        loss = checkpoint['loss']
+        model.train()
+        return model, loss, epoch
     model.eval()
-    return model
-
-
-if __name__ == "__main__":
-    from src.train_unet import Net
-
-    PATH = '../models/checkpoint_epoch_0_-0.947_2.752.pth'
-
-    model = Net()
-    model = load_model_from_checkpoint(model, PATH)
-
-    model_inference(model=model,
-                    model_pref='first',
-                    target_snr=20,
-                    path_for_results='../results/')
+    return model, None, None

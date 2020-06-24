@@ -9,7 +9,6 @@ from torchaudio.datasets.vctk import load_vctk_item
 from torch.utils.data import Dataset
 from torch import Tensor
 import torch.nn.functional as F
-from torchvision import transforms
 from src.models_config import base_dict
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -245,49 +244,3 @@ class VCTKNoise(torchaudio.datasets.VCTK):
         return (waveform_sound_noise, waveform, waveform_noise,
                 sample_rate, utterance,
                 speaker_id, utterance_id, noise_origin, noise_id, target_snr)
-
-
-def get_voice_noise_for_inference(speaker_id=None,
-                                  utterance_id=None,
-                                  noise_origin=None,
-                                  noise_id=None,
-                                  target_snr=10):
-    speakers_folder = os.path.join(BASE_DIR, 'data', 'VCTK-Corpus', 'wav48')
-    noise_folder = os.path.join(BASE_DIR, 'data', 'DEMAND')
-
-    def get_audio(base_folder, folder, sound_id):
-        available_folders = os.listdir(base_folder)
-        if folder is None:
-            folder = np.random.choice(available_folders)
-        else:
-            assert folder in available_folders
-
-        available_ids = os.listdir(os.path.join(base_folder,
-                                                folder))
-        if sound_id is None:
-            sound_id = np.random.choice(available_ids)
-        else:
-            assert sound_id in available_ids
-
-        file_sound = os.path.join(base_folder, folder, sound_id)
-        waveform, sample_rate = torchaudio.load(file_sound)
-        if sample_rate != base_dict['SAMPLE_RATE'] or len(waveform) != base_dict['AUDIO_LEN']:
-            composed = transforms.Compose([torchaudio.transforms.Resample(orig_freq=sample_rate,
-                                                                          new_freq=base_dict['SAMPLE_RATE']),
-                                           AudioPadding(required_length=base_dict['AUDIO_LEN'],
-                                                        # padding_tail='right'
-                                                        )])
-            return composed(waveform), folder, sound_id
-
-    waveform, speaker_id, utterance_id = get_audio(speakers_folder,
-                                                   folder=speaker_id,
-                                                   sound_id=utterance_id)
-    waveform_noise, noise_origin, noise_id = get_audio(noise_folder,
-                                                       folder=noise_origin,
-                                                       sound_id=noise_id)
-
-    noise_factor = get_noise_factor(waveform,
-                                    waveform_noise,
-                                    target_snr=target_snr)
-    waveform_noise = waveform_noise * noise_factor
-    return waveform + waveform_noise, speaker_id, utterance_id, noise_origin, noise_id
