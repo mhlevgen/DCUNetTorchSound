@@ -2,7 +2,6 @@ import os
 import json
 import logging
 import numpy as np
-from tqdm import tqdm
 import torch
 import torchaudio
 from torchaudio.datasets.utils import download_url, extract_archive, walk_files
@@ -10,6 +9,7 @@ from torchaudio.datasets.vctk import load_vctk_item
 from torch.utils.data import Dataset
 from torch import Tensor
 import torch.nn.functional as F
+from torchvision import transforms
 from src.models_config import base_dict
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -93,7 +93,7 @@ class DEMAND(Dataset):
                 if os.path.isdir(os.path.join(self._path, data_name)):
                     continue
                 if not os.path.isfile(archive):
-                    print(f'Loading {archive}')
+                    logging.info(f'Loading {archive}')
                     folder_to_load = os.path.split(archive)[0]
                     os.makedirs(folder_to_load, exist_ok=True)
                     download_url(url, folder_to_load)
@@ -199,13 +199,13 @@ class VCTKNoise(torchaudio.datasets.VCTK):
         self.total_speakers.sort()
         if speakers_list is None:
             self.selected_speakers = self.total_speakers[:self.num_speakers]
-            bool_selected_speaker = np.array([i in self.selected_speakers for i in speaker_id_list])
+            is_selected_speaker = np.array([i in self.selected_speakers for i in speaker_id_list])
         else:
             assert all([i in self.total_speakers for i in speakers_list])
             self.selected_speakers = speakers_list
-            bool_selected_speaker = np.array([i in speakers_list for i in speaker_id_list])
+            is_selected_speaker = np.array([i in speakers_list for i in speaker_id_list])
 
-        self._walker = np.array(self._walker)[bool_selected_speaker]
+        self._walker = np.array(self._walker)[is_selected_speaker]
 
     def __getitem__(self, n):
         fileid = self._walker[n]
@@ -222,6 +222,7 @@ class VCTKNoise(torchaudio.datasets.VCTK):
 
         if self.transform is not None:
             waveform = self.transform(waveform)
+            sample_rate = self.transform.__dict__['transforms'][0].__dict__['new_freq']
 
         waveform = waveform.squeeze()
 
@@ -246,21 +247,46 @@ class VCTKNoise(torchaudio.datasets.VCTK):
                 speaker_id, utterance_id, noise_origin, noise_id, target_snr)
 
 
-# if __name__ == "__main__":
-#     from torchvision import transforms
-#
-#     composed = transforms.Compose([torchaudio.transforms.Resample(orig_freq=48000,
-#                                                                   new_freq=16000),
-#                                    AudioPadding(required_length=49152)])
-#     demand_train = DEMAND(os.path.join(BASE_DIR, 'data'),
-#                           sample_rate=48000,
-#                           num_noise_to_load=4,
-#                           download=True,
-#                           transform=composed,
-#                           num_synthetic_noise=2,
-#                           )
-#
-#     i = demand_train[113]
-#     j = demand_train[2]
-#     print(i)
+def get_voice_noise_for_inference(speaker_id=None,
+                                  utterance_id=None,
+                                  noise_origin=None,
+                                  noise_id=None,
+                                  target_snr=10):
+    speakers_folder = os.path.join(BASE_DIR, 'data', 'VCTK-Corpus', 'wav48')
+    noise_folder = os.path.join(BASE_DIR, 'data', 'DEMAND')
 
+    def get_audio(base_folder, folder, sound_id):
+        available_folders = os.listdir(base_folder)
+        if folder is None:
+            folder = np.random.choice(available_folders)
+        else:
+            assert folder in available_folders
+
+        available_ids = os.listdir(os.path.join(base_folder,
+                                                folder))
+        if sound_id is None:
+            sound_id = np.random.choice(available_ids)
+        else:
+            assert sound_id in available_ids
+
+        file_sound = os.path.join(base_folder, folder, sound_id)
+        waveform, sample_rate = torchaudio.load(file_sound)
+        if sample_rate != base_dict['SAMPLE_RATE'] or len(waveform) != base_dict['AUDIO_LEN']:
+            composed = transforms.Compose([torchaudio.transforms.Resample(orig_freq=sample_rate,
+                                                                          new_freq=base_dict['SAMPLE_RATE']),
+                                           AudioPadding(required_length=base_dict['AUDIO_LEN'],
+                                                        padding_tail='right')])
+            return composed(waveform), folder, sound_id
+
+    waveform, speaker_id, utterance_id = get_audio(speakers_folder,
+                                                   folder=speaker_id,
+                                                   sound_id=utterance_id)
+    waveform_noise, noise_origin, noise_id = get_audio(noise_folder,
+                                                       folder=noise_origin,
+                                                       sound_id=noise_id)
+
+    noise_factor = get_noise_factor(waveform,
+                                    waveform_noise,
+                                    target_snr=target_snr)
+    waveform_noise = waveform_noise * noise_factor
+    return waveform + waveform_noise, speaker_id, utterance_id, noise_origin, noise_id
