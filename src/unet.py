@@ -103,36 +103,40 @@ class UNet(nn.Module):
                  padding_mode="zeros"):
         super().__init__()
 
-        self.model_config = get_model_config(model_features=model_features,
-                                             encoder_depth=encoder_depth)
+        model_config = get_model_config(model_features=model_features,
+                                        encoder_depth=encoder_depth)
         self.encoder_depth = encoder_depth
         self.encoder_list, self.decoder_list = [], []
+        self.encoder_config = model_config['encoder']
+        self.decoder_config = model_config['decoder']
 
         for i in range(encoder_depth):
-            encoder = Encoder(in_channels=self.model_config['enc_channels'][i],
-                              out_channels=self.model_config['enc_channels'][i + 1],
-                              kernel_size=self.model_config['enc_kernel_sizes'][i],
-                              stride=self.model_config['enc_strides'][i],
+            encoder_prop = self.encoder_config[f'encoder_{i}']
+
+            encoder = Encoder(in_channels=encoder_prop.in_channels,
+                              out_channels=encoder_prop.out_channels,
+                              kernel_size=encoder_prop.kernel_size,
+                              stride=encoder_prop.stride,
                               padding_mode=padding_mode)
             self.encoder_list.append(encoder)
 
         decoder_depth = encoder_depth
         for i in range(decoder_depth - 1):
-            decoder_in_channels = self.model_config['dec_channels'][i] + self.model_config['enc_channels'][-i - 1]
+            decoder_prop = self.decoder_config[f'decoder_{i}']
 
-            decoder = Decoder(in_channels=decoder_in_channels,
-                              out_channels=self.model_config['dec_channels'][i + 1],
-                              kernel_size=self.model_config['dec_kernel_sizes'][i],
-                              stride=self.model_config['dec_strides'][i],
-                              padding=self.model_config['dec_paddings'][i])
+            decoder = Decoder(in_channels=decoder_prop.in_channels,
+                              out_channels=decoder_prop.out_channels,
+                              kernel_size=decoder_prop.kernel_size,
+                              stride=decoder_prop.stride,
+                              padding=decoder_prop.padding)
             self.decoder_list.append(decoder)
 
-        last_layer_in_channels = self.model_config['dec_channels'][-2] + self.model_config['enc_channels'][1]
-        self.last_decoder = ComplexConvTranspose2d(in_channel=last_layer_in_channels,
-                                                   out_channel=self.model_config['dec_channels'][-1],
-                                                   kernel_size=self.model_config['dec_kernel_sizes'][-1],
-                                                   stride=self.model_config['dec_strides'][-1],
-                                                   padding=self.model_config['dec_paddings'][-1])
+        decoder_last = self.decoder_config[f'decoder_{decoder_depth - 1}']
+        self.last_decoder = ComplexConvTranspose2d(in_channel=decoder_last.in_channels,
+                                                   out_channel=decoder_last.out_channels,
+                                                   kernel_size=decoder_last.kernel_size,
+                                                   stride=decoder_last.stride,
+                                                   padding=decoder_last.padding)
         self.decoder_list = nn.ModuleList(self.decoder_list)
         self.encoder_list = nn.ModuleList(self.encoder_list)
 
