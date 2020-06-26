@@ -17,9 +17,6 @@ with open(os.path.join(BASE_DIR, 'src', 'demand_json.json'), 'r') as f:
     DEMAND_JSON = json.load(f)
 
 FOLDER_IN_ARCHIVE = "DEMAND"
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s : %(message)s',
-                    filename='dataset.log', filemode='w')
 
 
 def load_demand_item(fileid, ext_audio):

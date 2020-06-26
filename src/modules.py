@@ -1,8 +1,10 @@
+import os
 import torch
 import torch.nn as nn
 import torchaudio
 from pypesq import pesq
 from src.models_config import base_dict
+from src.datasets import BASE_DIR
 
 N_FFT = base_dict['N_FFT']
 HOP_LENGTH = base_dict['HOP_LENGTH']
@@ -67,10 +69,6 @@ class WeightedSDR:
         return self.loss(output, signal_with_noise, target_signal, noise)
 
 
-def dotproduct(y, y_hat):
-    return torch.bmm(y.unsqueeze(1), y_hat.unsqueeze(-1))
-
-
 def calculate_weighted_sdr(output, signal_with_noise, target_signal, noise):
     y = target_signal
     z = noise
@@ -105,15 +103,3 @@ def pesq_metric(y_hat, y_true):
         sum_pesq /= len(y)
         return sum_pesq
 
-
-def load_model_from_checkpoint(model, path_to_checkpoint, optimizer=None, training=False):
-    checkpoint = torch.load(path_to_checkpoint)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    if training:
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        epoch = checkpoint['epoch']
-        loss = checkpoint['loss']
-        model.train()
-        return model, loss, epoch
-    model.eval()
-    return model, None, None
