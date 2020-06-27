@@ -1,10 +1,10 @@
-# Phase-aware speech enhancement with deep complex U-Net
+# Phase-aware speech enhancement with DC U-Net
 Implementation of paper [Phase-aware speech enhancement with deep complex U-Net](https://openreview.net/pdf?id=SkeRTsAcYm) 
 
 ### Train
 Here you find all 4 architectires from paper
 
-![DCUnet_10](images/DCUnet_10.png)
+![DCUnet_10](images/DCUnet_10.png | width=48)
 
 ```bash
 python3 train_unet.py -m_f 32 -e_d 5 -epochs 10
