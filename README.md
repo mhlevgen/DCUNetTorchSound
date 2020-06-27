@@ -1,4 +1,4 @@
-# Phase-aware speech enhancement with deep complex U-Net
+# Phase-aware speech enhancement with DC U-Net
 Implementation of paper [Phase-aware speech enhancement with deep complex U-Net](https://openreview.net/pdf?id=SkeRTsAcYm) 
 
 ### Train
