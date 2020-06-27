@@ -56,6 +56,8 @@ def get_voice_noise_for_inference_bank(speaker_id=None,
                                     waveform_noise,
                                     target_snr=target_snr)
     waveform_noise = waveform_noise * noise_factor
+    utterance_id = os.path.splitext(utterance_id)[0]
+    noise_id = os.path.splitext(noise_id)[0]
     return waveform + waveform_noise, speaker_id, utterance_id, noise_origin, noise_id
 
 
@@ -71,77 +73,9 @@ def get_voice_noise_for_inference_custom(path_to_file):
     return waveform
 
 
-def model_inference(model, model_pref, folder_for_results,
-                    speaker_id=None,
-                    utterance_id=None,
-                    noise_origin=None,
-                    noise_id=None,
-                    target_snr=10):
-    path_for_results = os.path.join(BASE_DIR, folder_for_results)
-    os.makedirs(path_for_results, exist_ok=True)
-
-    (sound_noise_wave, speaker_id,
-     utterance_id, noise_origin,
-     noise_id) = get_voice_noise_for_inference_bank(speaker_id=speaker_id,
-                                                    utterance_id=utterance_id,
-                                                    noise_origin=noise_origin,
-                                                    noise_id=noise_id,
-                                                    target_snr=target_snr)
-
+def model_inference(model, sound_noise_wave):
     with torch.no_grad():
-        start = time.time()
-        estimated_sound = model(sound_noise_wave)
-        inference = round(time.time() - start, 3)
-        utterance_id = os.path.splitext(utterance_id)[0]
-        noise_id = os.path.splitext(noise_id)[0]
-
-        init_wave_file_name = f'init_sound_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-        torchaudio.save(os.path.join(path_for_results,
-                                     init_wave_file_name),
-                        sound_noise_wave,
-                        SAMPLE_RATE,
-                        precision=32)
-        print(f'Saved to {init_wave_file_name}, inference time {inference}')
-
-        procecces_wave_file_name = f'model_{model_pref}_{utterance_id}_{noise_origin}_{noise_id}_{target_snr}.wav'
-        torchaudio.save(os.path.join(path_for_results,
-                                     procecces_wave_file_name),
-                        estimated_sound,
-                        SAMPLE_RATE,
-                        precision=32)
-        print(f'Saved to {procecces_wave_file_name}')
-
-
-def model_inference_custom(model_checkpoint_name, folder_for_results, path_to_custom_file):
-    model_features = int(model_checkpoint_name.split('_')[2])
-    encoder_depth = int(model_checkpoint_name.split('_')[3])
-    model_epoch = int(model_checkpoint_name.split('_')[5])
-
-    ckp_dict = load_model_from_checkpoint(model_checkpoint_name, training=False)
-    model = ckp_dict['model']
-
-    model_pref = f'{model_features}_{encoder_depth}_{model_epoch}'
-
-    path_for_results = os.path.join(BASE_DIR, folder_for_results)
-    os.makedirs(path_for_results, exist_ok=True)
-    sound_noise_wave = get_voice_noise_for_inference_custom(path_to_custom_file)
-
-    with torch.no_grad():
-        start = time.time()
-        estimated_sound = model(sound_noise_wave)
-        inference = round(time.time() - start, 3)
-
-        print(f'Init file: {path_to_custom_file}')
-        init_file_name = os.path.splitext(os.path.split(path_to_custom_file)[1])[0]
-
-        procecces_wave_file_name = f'model_{model_pref}_{init_file_name}.wav'
-        path_to_load = os.path.join(path_for_results,
-                                    procecces_wave_file_name)
-        torchaudio.save(path_to_load,
-                        estimated_sound,
-                        SAMPLE_RATE,
-                        precision=32)
-        print(f'Saved to {path_to_load} inference time {inference}')
+        return model(sound_noise_wave)
 
 
 if __name__ == "__main__":
@@ -158,24 +92,53 @@ if __name__ == "__main__":
                         help='noise origin (DEMAND folder) if None pick random')
     parser.add_argument('-noise_id', '--noise_id',
                         help='noise id (DEMAND/noise_origin folder) if None pick random')
+    parser.add_argument('-custom_file', '--custom_file', default=None,
+                        help='path to custom file')
     args = parser.parse_args()
 
     model_name = args.checkpoint_name
+    path_for_results = os.path.join(BASE_DIR, 'results')
+    os.makedirs(path_for_results, exist_ok=True)
 
     model_features = int(model_name.split('_')[2])
     encoder_depth = int(model_name.split('_')[3])
     model_epoch = int(model_name.split('_')[5])
+    model_pref = f'{model_features}_{encoder_depth}_{model_epoch}'
 
     ckp_dict = load_model_from_checkpoint(args.checkpoint_name, training=False)
     model = ckp_dict['model']
 
-    output_pref = f'{model_features}_{encoder_depth}_{model_epoch}'
+    if args.custom_file is None:
+        (sound_noise_wave, speaker_id,
+         utterance_id, noise_origin,
+         noise_id) = get_voice_noise_for_inference_bank(speaker_id=args.speaker_id,
+                                                        utterance_id=args.utterance_id,
+                                                        noise_origin=args.noise_origin,
+                                                        noise_id=args.noise_id,
+                                                        target_snr=args.target_snr)
+        init_wave_file_name = f'init_sound_{utterance_id}_{noise_origin}_{noise_id}_{args.target_snr}.wav'
+        path_to_init_file = os.path.join(path_for_results,
+                                         init_wave_file_name)
+        torchaudio.save(path_to_init_file,
+                        sound_noise_wave,
+                        SAMPLE_RATE,
+                        precision=32)
+        print(f'Init file: {path_to_init_file}')
+        procecces_wave_file_name = f'model_{model_pref}_{utterance_id}_{noise_origin}_{noise_id}_{args.target_snr}.wav'
+    else:
+        sound_noise_wave = get_voice_noise_for_inference_custom(args.custom_file)
+        print(f'Init file: {args.custom_file}')
+        custom_file_name = os.path.splitext(os.path.split(args.custom_file)[1])[0]
+        procecces_wave_file_name = f'model_{model_pref}_{custom_file_name}.wav'
 
-    model_inference(model=model,
-                    model_pref=output_pref,
-                    target_snr=args.target_snr,
-                    speaker_id=args.speaker_id,
-                    utterance_id=args.utterance_id,
-                    noise_origin=args.noise_origin,
-                    noise_id=args.noise_id,
-                    folder_for_results='results')
+    start = time.time()
+    estimated_sound = model_inference(model, sound_noise_wave)
+    inference_time = round(time.time() - start, 3)
+
+    path_estimated_sound = os.path.join(path_for_results,
+                                        procecces_wave_file_name)
+    torchaudio.save(path_estimated_sound,
+                    estimated_sound,
+                    SAMPLE_RATE,
+                    precision=32)
+    print(f'Saved to {path_estimated_sound}, inference time {inference_time} s')
