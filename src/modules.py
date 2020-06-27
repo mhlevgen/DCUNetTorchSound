@@ -1,10 +1,8 @@
-import os
 import torch
 import torch.nn as nn
 import torchaudio
 from pypesq import pesq
 from src.models_config import base_dict
-from src.datasets import BASE_DIR
 
 N_FFT = base_dict['N_FFT']
 HOP_LENGTH = base_dict['HOP_LENGTH']
@@ -16,27 +14,12 @@ class ComplexMaskOnPolarCoo(nn.Module):
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def get_magnitude(real, img):
-        return torch.sqrt(real ** 2 + img ** 2)
-
-    @staticmethod
-    def get_phase(real, img):
-        return torch.atan2(img, real)
-
     def forward(self, sound_with_noise, unet_out):
-        input_real = sound_with_noise[..., 0]
-        input_img = sound_with_noise[..., 1]
-        out_real = unet_out[..., 0]
-        out_img = unet_out[..., 1]
-
-        mag_mask = self.get_magnitude(out_real, out_img)
+        mag_mask, phase_mask = torchaudio.functional.magphase(unet_out)
+        mag_input, phase_input = torchaudio.functional.magphase(sound_with_noise)
         mag_mask = torch.tanh(mag_mask)
-
-        phase_mask = self.get_phase(out_real, out_img)
-
-        mag = mag_mask * self.get_magnitude(input_real, input_img)
-        phase = phase_mask + self.get_phase(input_real, input_img)
+        mag = mag_mask * mag_input
+        phase = phase_mask + phase_input
         return torch.cat([(mag * torch.cos(phase)).unsqueeze(-1),
                           (mag * torch.sin(phase)).unsqueeze(-1)], axis=-1)
 

@@ -59,5 +59,11 @@ python3 inference_one_audio.py \
 ```
 -custom_file - path to custom file to read and process in model
 
+### Some experiments (after 10 epochs training)
 
+|  SNR          |  Initial sound| DCUnet-10     | DCUnet-16  | DCUnet-20 |
+| ------------- |:-------------:| -------------:|-----------:|----------:|
+| live audio    | [live.wav](results/live_1.wav) |[live_10.wav](results/model_32_5_9_live_1.wav) | [live_16.wav](results/model_32_8_6_live_1.wav) |[live_20.wav](results/model_32_10_6_live_1.wav)|
+| 0     | [init_sound_1.wav](results/init_sound_p361_010_TMETRO_ch01_0.wav) |[sound_1_10.wav](results/model_32_5_9_p361_010_TMETRO_ch01_0.wav) | [sound_1_16.wav](results/model_32_8_9_p361_010_TMETRO_ch01_0.wav) |[sound_1_20.wav](results/model_32_10_6_p361_010_TMETRO_ch01_0.wav)|
+| 10 | [init_sound_2.wav](results/init_sound_p361_010_TMETRO_ch01_10.wav) |[live_2_10.wav](results/model_32_5_9_p361_010_TMETRO_ch01_10.wav) | [live_2_16.wav](results/model_32_8_9_p361_010_TMETRO_ch01_10.wav) |[live_2_20.wav](results/model_32_10_6_p361_010_TMETRO_ch01_10.wav)|
 
