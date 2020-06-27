@@ -1,7 +1,6 @@
 .idea/
 data/
 models/
-images/
 .dvc/
 speech_env/
 .env
