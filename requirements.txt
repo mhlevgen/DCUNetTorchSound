@@ -1,0 +1,10 @@
+Cython==0.29.20
+future==0.18.2
+numpy==1.19.0
+Pillow==7.1.2
+pkg-resources==0.0.0
+pypesq==1.2.4
+torch==1.5.1+cu101
+torchaudio==0.5.1
+torchvision==0.6.1+cu101
+tqdm==4.46.1
