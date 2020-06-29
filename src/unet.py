@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 from src.models_config import get_model_config
 
+# some complex blocks from https://github.com/litcoderr/ComplexCNN
 
 class ComplexConv2d(nn.Module):
-    # from https://github.com/litcoderr/ComplexCNN
     def __init__(self, in_channel, out_channel, kernel_size, stride=1, padding=0, **kwargs):
         super().__init__()
 
