@@ -29,21 +29,23 @@ class ISTFT(nn.Module):
         super(self.__class__, self).__init__()
 
     def forward(self, Y_hat):
+        window = torch.hann_window(N_FFT, device=Y_hat)
         return torchaudio.functional.istft(Y_hat,
                                            n_fft=N_FFT,
                                            hop_length=HOP_LENGTH,
                                            length=AUDIO_LEN,
-                                           window=torch.hann_window(N_FFT)).squeeze()
+                                           window=window).squeeze()
 
 
 class STFT(nn.Module):
     def __init__(self):
         super(self.__class__, self).__init__()
 
-    def forward(self, voise_noise):
-        voise_noise = torch.stft(voise_noise, n_fft=N_FFT,
+    def forward(self, voice_noise):
+        window = torch.hann_window(N_FFT, device=voice_noise)
+        voise_noise = torch.stft(voice_noise, n_fft=N_FFT,
                                  hop_length=HOP_LENGTH,
-                                 window=torch.hann_window(N_FFT))
+                                 window=window)
         return voise_noise.unsqueeze(1)
 
 
