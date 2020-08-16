@@ -1,3 +1,6 @@
+import functools
+import multiprocessing
+
 import torch
 import torch.nn as nn
 import torchaudio
@@ -8,6 +11,9 @@ N_FFT = base_dict['N_FFT']
 HOP_LENGTH = base_dict['HOP_LENGTH']
 AUDIO_LEN = base_dict['AUDIO_LEN']
 SAMPLE_RATE = base_dict['SAMPLE_RATE']
+
+
+pesq_pool = multiprocessing.Pool()
 
 
 class ComplexMaskOnPolarCoo(nn.Module):
@@ -80,14 +86,22 @@ def calculate_weighted_sdr(output, signal_with_noise, target_signal, noise):
 
 
 def pesq_metric(y_hat, y_true):
-    with torch.no_grad():
-        y_hat = y_hat.cpu().data.numpy()
-        y = y_true.cpu().data.numpy()
+    y_hat = y_hat.cpu().numpy()
+    y = y_true.cpu().numpy()
+    return [pesq(y1, y_hat1, SAMPLE_RATE) for y1, y_hat1 in zip(y, y_hat)]
 
-        sum_pesq = 0
-        for i in range(len(y)):
-            sum_pesq += pesq(y[i], y_hat[i], SAMPLE_RATE)
 
-        sum_pesq /= len(y)
-        return sum_pesq
+def pesq_metric_async(y_hat, y_true):
+    """Compute PESQ scores in background using ``multiprocessing.Pool``.
 
+    Args:
+        y_hat, y_true (Tensors of shape (batch, audio_len))
+
+    Returns:
+        ``multiprocessing.AsyncResult`` whose ``.get()`` method returns a list
+        of floats
+    """
+    y_hat = y_hat.cpu().numpy()
+    y = y_true.cpu().numpy()
+    return pesq_pool.starmap_async(functools.partial(pesq, fs=SAMPLE_RATE),
+                                   zip(y, y_hat))

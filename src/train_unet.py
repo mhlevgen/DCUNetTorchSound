@@ -8,6 +8,7 @@ from torchvision import transforms
 import torchaudio
 import torch.nn as nn
 import torch.optim as optim
+import tqdm
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -17,13 +18,15 @@ from src.datasets import DEMAND, VCTKNoise, BASE_DIR
 from src.models_config import base_dict
 from src.unet import UNet
 from src.modules import STFT, ComplexMaskOnPolarCoo, ISTFT, WeightedSDR, \
-    pesq_metric
+    pesq_metric_async
 
 AUDIO_LEN = base_dict['AUDIO_LEN']
 SAMPLE_RATE = base_dict['SAMPLE_RATE']
 LOAD_SAMPLE_RATE = base_dict['LOAD_SAMPLE_RATE']
 BATCH_SIZE = base_dict['BATCH_SIZE']
 PRINT_N_BATCH = 10
+COMPUTE_PESQ_PERCENTAGE = 1
+PESQ_SKIPPED = None
 
 
 class Net(nn.Module):
@@ -217,115 +220,152 @@ if __name__ == "__main__":
 
     model.to(device)
 
-    for epoch in range(epoch_start, args.num_epochs):
+    for epoch in tqdm.trange(epoch_start, args.num_epochs, desc="Epoch"):
         loss_train, pesq_train = [], []
         loss_test, pesq_test = [], []
         model.train()
-        for i, data in enumerate(data_loader_train):
-            logging.info(f"Epoch {epoch} - {i}")
-            (waveform_sound_noise, waveform, waveform_noise, _, _,
-             speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data
-
-            logging.info(
-                f"Data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i, j, z, k, f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
-
-            waveform_sound_noise = waveform_sound_noise.to(device)
-            waveform = waveform.to(device)
-            waveform_noise = waveform_noise.to(device)
-
-            optimizer.zero_grad()
-
-            estimated_sound = model(waveform_sound_noise)
-            logging.info(f"Epoch {epoch} - {i} estimated_sound got")
-
-            loss = loss_sdr(output=estimated_sound,
-                            signal_with_noise=waveform_sound_noise,
-                            target_signal=waveform,
-                            noise=waveform_noise)
-
-            logging.info(f"Epoch {epoch} - {i} loss calculated")
-
-            pesq = pesq_metric(y_hat=estimated_sound, y_true=waveform)
-            logging.info(f"Epoch {epoch} - {i} pesq calculated")
-
-            loss.backward()
-            optimizer.step()
-
-            logging.info(f"Epoch {epoch} - {i} backward done")
-
-            loss_train.append(loss.item())
-            pesq_train.append(pesq)
-
-            if i % PRINT_N_BATCH == PRINT_N_BATCH - 1:
-                print('train [%d, %5d] loss: %.3f, pesq: %.3f' %
-                      (epoch, i, np.mean(loss_train), np.nanmean(pesq_train)))
-
-        mode = 'w' if epoch == 0 else 'a'
-        write_metrics_to_file(f'train_loss_{model_prefix}.txt',
-                              loss_train,
-                              epoch=epoch,
-                              mode=mode)
-        write_metrics_to_file(f'train_pesq_{model_prefix}.txt',
-                              pesq_train,
-                              epoch=epoch,
-                              mode=mode)
-
-        with torch.no_grad():
-            model.eval()
-            for i, data in enumerate(data_loader_test):
+        with tqdm.tqdm(data_loader_train, desc=f"Epoch {epoch} train batch") as train_progress:
+            for i, data in enumerate(train_progress):
+                logging.debug(f"Epoch {epoch} - {i}")
                 (waveform_sound_noise, waveform, waveform_noise, _, _,
                  speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data
 
-                logging.info(
-                    f"Test data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i, j, z, k, f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
+                logging.debug(
+                    f"Data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i, j, z, k, f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
 
                 waveform_sound_noise = waveform_sound_noise.to(device)
                 waveform = waveform.to(device)
                 waveform_noise = waveform_noise.to(device)
 
+                optimizer.zero_grad()
+
                 estimated_sound = model(waveform_sound_noise)
-                logging.info(f"Epoch {epoch} - {i} estimated_sound got")
+                logging.debug(f"Epoch {epoch} - {i} estimated_sound got")
 
                 loss = loss_sdr(output=estimated_sound,
                                 signal_with_noise=waveform_sound_noise,
                                 target_signal=waveform,
                                 noise=waveform_noise)
-                logging.info(f"Epoch {epoch} - {i} loss calculated")
 
-                pesq = pesq_metric(y_hat=estimated_sound, y_true=waveform)
-                logging.info(f"Epoch {epoch} - {i} pesq calculated")
+                logging.debug(f"Epoch {epoch} - {i} loss calculated")
 
-                loss_test.append(loss.item())
-                pesq_test.append(pesq)
+                # Compute PESQ only for a subset of samples, and compute it in
+                # a background process so as to not slow down training.
+                if np.random.uniform() < COMPUTE_PESQ_PERCENTAGE:
+                    pesq = pesq_metric_async(y_hat=estimated_sound, y_true=waveform)
+                    logging.debug(f"Epoch {epoch} - {i} pesq calculated")
+                else:
+                    pesq = PESQ_SKIPPED
 
-            print('test %d loss: %.3f, pesq: %.3f' %
-                  (epoch, np.mean(loss_test), np.mean(pesq_test)))
+                loss.backward()
+                optimizer.step()
 
-            write_metrics_to_file(f'test_loss_{model_prefix}.txt',
-                                  loss_test,
+                logging.debug(f"Epoch {epoch} - {i} backward done")
+
+                loss_train.append(loss.item())
+                pesq_train.append(pesq)
+
+                # Update tqdm progress bar with stats of last 10 batches.
+                info = {
+                    "loss": np.mean(loss_train[-10:]),
+                }
+                if COMPUTE_PESQ_PERCENTAGE:
+                    # Only include ready results, never wait for a result to
+                    # become available.
+                    info["pesq"] = np.nanmean([
+                        np.nanmean(async_res.get()) if async_res.ready() else float("NaN")
+                        for async_res in pesq_train[-10:]
+                        if async_res is not PESQ_SKIPPED
+                    ])
+                train_progress.set_postfix(info)
+
+            # Wait for all results to become available.
+            pesq_train = [
+                np.nanmean(async_res.get()) if async_res is not PESQ_SKIPPED else float("NaN")
+                for async_res in pesq_train
+            ]
+            mode = 'w' if epoch == 0 else 'a'
+            write_metrics_to_file(f'train_loss_{model_prefix}.txt',
+                                  loss_train,
                                   epoch=epoch,
                                   mode=mode)
-            write_metrics_to_file(f'test_pesq_{model_prefix}.txt',
-                                  pesq_test,
+            write_metrics_to_file(f'train_pesq_{model_prefix}.txt',
+                                  pesq_train,
                                   epoch=epoch,
                                   mode=mode)
 
-            scheduler.step(np.mean(loss_test))
+        with tqdm.tqdm(data_loader_test, desc=f"Epoch {epoch} val batch") as val_progress:
+            with torch.no_grad():
+                model.eval()
+                for i, data in enumerate(val_progress):
+                    (waveform_sound_noise, waveform, waveform_noise, _, _,
+                     speaker_id, utterance_id, noise_origin, noise_id, target_snr) = data
 
-            if not args.save_best or (args.save_best and np.mean(pesq_test) > start_pesq_test):
-                path = os.path.join(BASE_DIR, 'models',
-                                    'chp_model_{}_{}_epoch_{}_{:.2f}_{:.2f}.pth'.format(args.model_features,
-                                                                                        args.encoder_depth,
-                                                                                        epoch,
-                                                                                        np.mean(loss_test),
-                                                                                        np.nanmean(pesq_test)
-                                                                                        ))
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'loss': np.mean(loss_test),
-                    'pesq': np.nanmean(pesq_test)
-                }, path)
+                    logging.info(
+                        f"Test data ids {' '.join([f'{i}-{j}-{f}-{z}-{k}' for i, j, z, k, f in zip(speaker_id, utterance_id, noise_id, target_snr, noise_origin)])}")
 
-                start_pesq_test = np.nanmean(pesq_test)
+                    waveform_sound_noise = waveform_sound_noise.to(device)
+                    waveform = waveform.to(device)
+                    waveform_noise = waveform_noise.to(device)
+
+                    estimated_sound = model(waveform_sound_noise)
+                    logging.debug(f"Epoch {epoch} val - {i} estimated_sound got")
+
+                    loss = loss_sdr(output=estimated_sound,
+                                    signal_with_noise=waveform_sound_noise,
+                                    target_signal=waveform,
+                                    noise=waveform_noise)
+
+                    logging.debug(f"Epoch {epoch} val - {i} loss calculated")
+
+                    pesq = pesq_metric_async(y_hat=estimated_sound, y_true=waveform)
+
+                    loss_test.append(loss.item())
+                    pesq_test.append(pesq)
+
+                    # Update tqdm progress bar with stats that we have so far.
+                    val_progress.set_postfix({
+                        "loss": np.mean(loss_test),
+
+                        # Only include ready results, never wait for a result to
+                        # become available.
+                        "pesq": np.nanmean([
+                            np.nanmean(async_res.get()) if async_res.ready() else float("NaN")
+                            for async_res in pesq_test
+                        ])
+                    })
+
+                # Wait for all results to become available.
+                pesq_test = [np.nanmean(async_res.get()) for async_res in pesq_test]
+
+                logging.info('test %d loss: %.3f, pesq: %.3f' %
+                             (epoch, np.mean(loss_test), np.nanmean(pesq_test)))
+
+                write_metrics_to_file(f'test_loss_{model_prefix}.txt',
+                                      loss_test,
+                                      epoch=epoch,
+                                      mode=mode)
+                write_metrics_to_file(f'test_pesq_{model_prefix}.txt',
+                                      pesq_test,
+                                      epoch=epoch,
+                                      mode=mode)
+
+                scheduler.step(np.mean(loss_test))
+
+                if not args.save_best or (args.save_best and np.nanmean(pesq_test) > start_pesq_test):
+                    path = os.path.join(BASE_DIR, 'models',
+                                        'chp_model_{}_{}_epoch_{}_{:.2f}_{:.2f}.pth'.format(args.model_features,
+                                                                                            args.encoder_depth,
+                                                                                            epoch,
+                                                                                            np.mean(loss_test),
+                                                                                            np.nanmean(pesq_test)
+                                                                                            ))
+                    torch.save({
+                        'epoch': epoch,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'loss': np.mean(loss_test),
+                        'pesq': np.nanmean(pesq_test)
+                    }, path)
+
+                    start_pesq_test = np.nanmean(pesq_test)
