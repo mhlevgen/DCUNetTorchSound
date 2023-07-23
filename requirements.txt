@@ -4,7 +4,7 @@ numpy==1.19.0
 Pillow==9.0.1
 pkg-resources==0.0.0
 pypesq==1.2.4
-torch==1.5.1+cu101
+torch==1.13.1
 torchaudio==0.5.1
 torchvision==0.6.1+cu101
 tqdm==4.46.1
